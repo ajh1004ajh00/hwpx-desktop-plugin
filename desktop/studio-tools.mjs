@@ -1,15 +1,4 @@
 import { validateApplyTextCommand } from './node_modules/@rhwp/editor/document-agent-contract.js';
-export async function exportWorkingCopy(editor) {
-  const before = (await editor.commands.context()).desktopSnapshot;
-  if (!before?.state || before.composing) throw new Error('문서 입력이 끝난 뒤 다시 저장하세요.');
-  const bytes = await editor.exportHwpx();
-  const after = await editor.getDocumentState();
-  if (['documentEpoch','changeSeq','documentSha256'].some(key => before.state[key] !== after[key])) {
-    throw new Error('저장 중 문서가 변경됐습니다. 현재 문서를 확인하고 다시 저장하세요.');
-  }
-  const stem = (before.fileName || '문서').split(/[\\/]/).pop().replace(/\.(hwp|hwpx|hml)$/i,'');
-  return { bytes, fileName: stem + '_작업본.hwpx' };
-}
 export function makeTextCommand(snapshot, replacement, commandId) {
   if (snapshot.composing) throw new Error('한글 입력 조합이 끝난 뒤 다시 읽어주세요.');
   if (!snapshot.selection?.editable || !snapshot.evidence) throw new Error('AI는 현재 일반 본문 문단만 수정할 수 있습니다. 표/혼합 서식은 직접 편집하세요.');
