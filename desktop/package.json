@@ -1,0 +1,9 @@
+{
+  "name": "hwpx-desktop-live",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@rhwp/core": "0.8.6",
+    "@rhwp/editor": "0.8.6"
+  }
+}

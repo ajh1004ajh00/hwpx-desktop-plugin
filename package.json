@@ -1,0 +1,13 @@
+{
+  "name": "hwpx-desktop-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "setup": "node scripts/setup-desktop-editor.mjs",
+    "build": "node scripts/setup-desktop-editor.mjs --build-only",
+    "start": "node scripts/start-desktop.mjs",
+    "test": "node --test desktop/*.test.mjs"
+  }
+}

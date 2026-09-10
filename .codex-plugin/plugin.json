@@ -1,0 +1,25 @@
+{
+  "name": "hwpx-desktop-plugin",
+  "version": "0.1.0",
+  "description": "Desktop 내장 브라우저에서 rhwp로 한글 문서를 직접 편집하고 AI와 함께 분석·작성합니다.",
+  "author": { "name": "ajh1004ajh00", "url": "https://github.com/ajh1004ajh00" },
+  "homepage": "https://github.com/ajh1004ajh00/hwpx-desktop-plugin#readme",
+  "repository": "https://github.com/ajh1004ajh00/hwpx-desktop-plugin",
+  "license": "MIT",
+  "keywords": ["hwpx", "hwp", "rhwp", "desktop", "webmcp"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "HWPX Desktop",
+    "shortDescription": "한글 문서 실시간 편집과 커서·표·문서 분석",
+    "longDescription": "로컬 rhwp Studio를 내장 브라우저에 표시합니다. 직접 입력, 커서·선택 영역 AI 입력, 표와 문서의 텍스트·서식 분석, 작업본 다운로드를 지원합니다. Node.js 24+, Git 및 WebMCP 지원 host가 필요합니다.",
+    "developerName": "ajh1004ajh00",
+    "category": "Productivity",
+    "capabilities": ["Document Analysis", "Document Editing"],
+    "websiteURL": "https://github.com/ajh1004ajh00/hwpx-desktop-plugin",
+    "defaultPrompt": [
+      "한글 문서를 함께 편집할 Desktop 화면을 열어줘.",
+      "현재 커서가 있는 표의 내용과 글자 서식을 분석해줘.",
+      "현재 커서 위치에 요청한 내용을 입력해줘."
+    ]
+  }
+}
