@@ -31,6 +31,6 @@
 ## Task 3: 게시
 
 - [x] `git diff --check`와 staged 파일 목록으로 문서/비밀정보/생성물을 제외했는지 확인한다.
-- [ ] `git commit -m "feat: rhwp Desktop 전용 플러그인 분리"`를 실행한다.
-- [ ] `gh repo create ajh1004ajh00/hwpx-desktop-plugin --private --source . --remote origin --push`를 실행한다.
-- [ ] `gh repo view --json url,visibility` 및 원격 HEAD와 로컬 HEAD 일치를 확인한다.
+- [x] `git commit -m "feat: rhwp Desktop 전용 플러그인 분리"`를 실행한다.
+- [x] `gh repo create ajh1004ajh00/hwpx-desktop-plugin --private --source . --remote origin --push`를 실행한다.
+- [x] `gh repo view --json url,visibility` 및 원격 HEAD와 로컬 HEAD 일치를 확인한다.
