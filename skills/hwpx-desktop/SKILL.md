@@ -3,7 +3,10 @@ name: hwpx-desktop
 description: Desktop 내장 브라우저의 rhwp Studio로 HWP/HWPX 문서를 함께 편집하고 커서·선택 영역, 현재 표와 전체 문서의 내용·서식을 분석한다. 로컬 실시간 문서 작업에 사용한다.
 ---
 
-# HWPX Desktop
+# 한글메이트
+
+GPT와 함께 쓰고 고치는 한글 문서. 임시 제품명은 한글메이트이며,
+설치 호환성을 위해 플러그인 식별자 `hwpx-desktop-plugin`을 유지한다.
 
 ## 실행과 파일 열기
 

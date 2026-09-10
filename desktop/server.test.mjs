@@ -13,7 +13,7 @@ test('Desktop serves only UI/runtime, refuses document upload and private paths'
     const page = await fetch(base + '/');
     assert.equal(page.status, 200);
     const pageHtml = await page.text();
-    assert.match(pageHtml, /HWPX · Live/);
+    assert.match(pageHtml, /한글메이트/);
     assert.doesNotMatch(pageHtml, /id="(?:open|download|save-link)"/);
     assert.match(page.headers.get('content-security-policy'), /frame-ancestors 'none'/);
     assert.equal((await fetch(base + '/desktop/node_modules/@rhwp/editor/index.js')).status, 200);

@@ -1,25 +1,37 @@
 {
   "name": "hwpx-desktop-plugin",
-  "version": "0.1.0+codex.20260910072840",
-  "description": "Desktop 내장 브라우저에서 rhwp로 한글 문서를 직접 편집하고 AI와 함께 분석·작성합니다.",
-  "author": { "name": "ajh1004ajh00", "url": "https://github.com/ajh1004ajh00" },
+  "version": "0.1.0+codex.20260910080921",
+  "description": "Desktop \ub0b4\uc7a5 \ube0c\ub77c\uc6b0\uc800\uc5d0\uc11c rhwp\ub85c \ud55c\uae00 \ubb38\uc11c\ub97c \uc9c1\uc811 \ud3b8\uc9d1\ud558\uace0 AI\uc640 \ud568\uaed8 \ubd84\uc11d\u00b7\uc791\uc131\ud569\ub2c8\ub2e4.",
+  "author": {
+    "name": "ajh1004ajh00",
+    "url": "https://github.com/ajh1004ajh00"
+  },
   "homepage": "https://github.com/ajh1004ajh00/hwpx-desktop-plugin#readme",
   "repository": "https://github.com/ajh1004ajh00/hwpx-desktop-plugin",
   "license": "MIT",
-  "keywords": ["hwpx", "hwp", "rhwp", "desktop", "webmcp"],
+  "keywords": [
+    "hwpx",
+    "hwp",
+    "rhwp",
+    "desktop",
+    "webmcp"
+  ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "HWPX Desktop",
-    "shortDescription": "한글 문서 실시간 편집과 커서·표·문서 분석",
-    "longDescription": "로컬 rhwp Studio를 내장 브라우저에 표시합니다. 첨부 파일 선택을 연결하고, WebMCP 우선으로 커서·선택 영역 AI 입력과 표·문서 분석을 수행하며 Studio 파일 메뉴로 저장합니다. Node.js 24+, Git 및 WebMCP 지원 host가 필요합니다.",
+    "displayName": "\ud55c\uae00\uba54\uc774\ud2b8",
+    "shortDescription": "GPT\uc640 \ud568\uaed8 \uc4f0\uace0 \uace0\uce58\ub294 \ud55c\uae00 \ubb38\uc11c",
+    "longDescription": "\ud55c\uae00\uba54\uc774\ud2b8\ub294 Desktop\uc5d0\uc11c \ud55c\uae00 \ubb38\uc11c\ub97c GPT\uc640 \ud568\uaed8 \ud3b8\uc9d1\ud558\ub294 \uac1c\ubc1c \uc911 \ud50c\ub7ec\uadf8\uc778\uc785\ub2c8\ub2e4. \ud604\uc7ac \ucee4\uc11c\u00b7\uc120\ud0dd \uc785\ub825\uacfc \ud45c\u00b7\ubb38\uc11c \ubd84\uc11d\uc744 \uc9c0\uc6d0\ud569\ub2c8\ub2e4. HWP/HWPX \uc785\ub825\uacfc HWP/HWPX/PDF \ucd9c\ub825\uc758 Windows\u00b7macOS \ud488\uc9c8 \uac80\uc99d\uc744 \uc9c4\ud589\ud560 \uc608\uc815\uc774\uba70, \ucca8\ubd80 \uc790\ub3d9 \uc5f4\uae30\uc640 \uc800\uc7a5\u00b7\uc7ac\uc5f4\uae30\ub294 \ubbf8\uac80\uc99d\uc785\ub2c8\ub2e4. Node.js 24+, Git \ubc0f WebMCP \uc9c0\uc6d0 host\uac00 \ud544\uc694\ud569\ub2c8\ub2e4.",
     "developerName": "ajh1004ajh00",
     "category": "Productivity",
-    "capabilities": ["Document Analysis", "Document Editing"],
+    "capabilities": [
+      "Document Analysis",
+      "Document Editing"
+    ],
     "websiteURL": "https://github.com/ajh1004ajh00/hwpx-desktop-plugin",
     "defaultPrompt": [
-      "한글 문서를 함께 편집할 Desktop 화면을 열어줘.",
-      "현재 커서가 있는 표의 내용과 글자 서식을 분석해줘.",
-      "현재 커서 위치에 요청한 내용을 입력해줘."
+      "\ud55c\uae00 \ubb38\uc11c\ub97c \ud568\uaed8 \ud3b8\uc9d1\ud560 Desktop \ud654\uba74\uc744 \uc5f4\uc5b4\uc918.",
+      "\ud604\uc7ac \ucee4\uc11c\uac00 \uc788\ub294 \ud45c\uc758 \ub0b4\uc6a9\uacfc \uae00\uc790 \uc11c\uc2dd\uc744 \ubd84\uc11d\ud574\uc918.",
+      "\ud604\uc7ac \ucee4\uc11c \uc704\uce58\uc5d0 \uc694\uccad\ud55c \ub0b4\uc6a9\uc744 \uc785\ub825\ud574\uc918."
     ]
   }
 }
