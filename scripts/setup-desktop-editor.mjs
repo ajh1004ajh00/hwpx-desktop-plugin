@@ -28,6 +28,10 @@ for (const file of ['rhwp.js', 'rhwp_bg.wasm']) {
   await cp(resolve(core, file), resolve(source, 'pkg', file));
   await cp(resolve(core, file), resolve(source, 'rhwp-studio/public', file));
 }
+// Copy only runtime assets; upstream public/samples contains documents unrelated to this package.
+for (const name of ['icons','images','favicon.ico','print.html','theme-init.js','rhwp.js','rhwp_bg.wasm']) {
+  await cp(resolve(source,'rhwp-studio/public',name),resolve(root,'desktop/.runtime/public',name),{recursive:true});
+}
 run(process.execPath, [resolve(source, 'rhwp-studio/node_modules/vite/bin/vite.js'), 'build', '--config', resolve(root, 'desktop/studio-build.config.mjs')]);
 const fonts = resolve(root, 'desktop/.runtime/studio/fonts');
 try { if ((await stat(fonts)).isFile()) await rm(fonts); } catch (error) { if (error.code !== 'ENOENT') throw error; }

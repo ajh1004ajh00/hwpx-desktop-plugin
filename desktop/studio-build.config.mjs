@@ -6,7 +6,7 @@ function replaceOnce(code, marker, replacement) {
 }
 // Build the pinned upstream editor without its dev-server file reader or PWA cache.
 export default {
-  root: resolve(root, 'rhwp-studio'), base: '/studio/',
+  root: resolve(root, 'rhwp-studio'), base: '/studio/', publicDir: resolve(import.meta.dirname,'.runtime/public'),
   define: { __APP_VERSION__: JSON.stringify('0.8.6-local'), __RHWP_DISABLE_EXTERNAL_WEBFONTS__: 'true', __RHWP_HWPCTRL__: 'true' },
   resolve: { alias: {
     '@': resolve(root, 'rhwp-studio/src'), '@wasm/rhwp.js': resolve(root, 'pkg/rhwp.js'), '@wasm': resolve(root, 'pkg'),
@@ -22,6 +22,11 @@ export default {
     // Exact cursor evidence + fenced native snapshot commands; no separate document model.
     transform(code, id) {
       code=code.replaceAll('\r\n','\n');
+      if (id.replaceAll('\\','/').endsWith('/rhwp-studio/src/ui/find-dialog.ts')) {
+        // Native character formatting uses ByPath APIs even for root table cells.
+        return {code:replaceOnce(code,'cellParaIndex: cell.cellPara,',`cellParaIndex: cell.cellPara,
+        cellPath: [{controlIndex:cell.ctrlIdx,cellIndex:cell.cellIdx,cellParaIndex:cell.cellPara}],`),map:null};
+      }
       if (id.replaceAll('\\','/').endsWith('/rhwp-studio/src/engine/input-handler.ts')) {
         for (const entry of ['executeOperation(desc: OperationDescriptor): void {','private handleUndo(): void {','private handleRedo(): void {']) {
           code=replaceOnce(code,entry,`${entry}\n    if (this.desktopMutationLocked) throw new Error('EDITOR_BUSY');`);
@@ -31,6 +36,7 @@ export default {
         if (!code.includes(marker) || !code.includes(move)) throw new Error('Pinned input-handler cursor API changed');
         return {code:replaceOnce(code,move, `if (desc.operationType === 'desktop-cursor-insert') this.cursor.clearSelection();\n    ${move}`).replace(marker, `${marker}
   desktopMutationLocked = false;
+  getDesktopComposing() { return this.isComposing; }
   getDesktopCursorContext() {
     return {
       position:this.cursor.getPosition(), selection:this.cursor.getSelectionOrdered(), rect:this.cursor.getRect(),
@@ -56,7 +62,7 @@ async function desktopCreateNewDocument(): Promise<void> {`);
       if (![context,apply,execute,initialized].every(marker=>code.includes(marker))) throw new Error('Pinned Studio bridge changed; review overlay before building.');
       let transformed=code.replace(initialized, `${initialized}
 const desktopCursor = createCursorBridge({
-  getEnvironment: () => ({wasm,input:inputHandler,agent:documentAgent,composing:desktopComposing,render:()=>canvasView!.refreshDocumentAgentMutation()}),
+  getEnvironment: () => ({wasm,input:inputHandler,agent:documentAgent,composing:inputHandler?.getDesktopComposing()??false,render:()=>canvasView!.refreshDocumentAgentMutation()}),
   mutate:(bridge,start,end,text) => {
     if (end.charOffset>start.charOffset) new DeleteTextCommand(start,end.charOffset-start.charOffset,'forward').execute(bridge);
     return new InsertTextCommand(start,text).execute(bridge);
@@ -71,8 +77,21 @@ const desktopCursor = createCursorBridge({
   },
 });
 const desktopAnalysis=createDocumentAnalysis({
-  getEnvironment:()=>({wasm,agent:documentAgent}),
+  getEnvironment:()=>({wasm,agent:documentAgent,composing:inputHandler?.getDesktopComposing()??false}),
   assertIdle:()=>desktopCursor.assertIdle(),
+  focus:hit=>{
+    if(!inputHandler) throw new Error('FOCUS_UNAVAILABLE');
+    inputHandler.exitFootnoteModeForBodyNavigation();
+    navigateToSearchHit(inputHandler,hit);
+    const actual=inputHandler.getDesktopCursorContext().selection;
+    const cell=hit.cellContext;
+    const start=actual?.start,end=actual?.end;
+    if(!start||!end||start.sectionIndex!==hit.sec||end.sectionIndex!==hit.sec
+      ||start.paragraphIndex!==hit.para||end.paragraphIndex!==hit.para
+      ||start.charOffset!==hit.charOffset||end.charOffset!==hit.charOffset+hit.length
+      ||(cell && [start,end].some(p=>p.parentParaIndex!==cell.parentPara||p.controlIndex!==cell.ctrlIdx||p.cellIndex!==cell.cellIdx||p.cellParaIndex!==cell.cellPara))
+      ||(!cell && [start,end].some(p=>p.parentParaIndex!==undefined))) throw new Error('FOCUS_MISMATCH');
+  },
 });
 `).replace(context, `async automationContext() {
   await initPromise;
@@ -84,10 +103,12 @@ const desktopAnalysis=createDocumentAnalysis({
     evidence=selection.editable && selection.target ? desktopEvidence(wasm,selection.target) : null;
   } catch { /* A cell-local paragraph is not a body paragraph; cursor path remains authoritative. */ }
   return {...automation.getContext(), desktopSnapshot:{...snapshot,selection,evidence}};
-}`).replace(apply, `if (desktopComposing) throw new Error('IME_COMPOSING: finish text composition first');
+}`).replace(apply, `if (inputHandler?.getDesktopComposing()) throw new Error('IME_COMPOSING: finish text composition first');
       return desktopCursor.exclusive(()=>documentAgent!.applyTextCommand(command));`)
         .replace(execute, `if (id==='desktop:analyze-current-table') return desktopAnalysis.currentTable(params);
       if (id==='desktop:analyze-document') return desktopAnalysis.document(params);
+      if (id==='desktop:find-targets') return desktopAnalysis.search(params);
+      if (id==='desktop:focus-target') return desktopAnalysis.focus(params);
       if (id==='desktop:insert-text') return desktopCursor.apply(params);
       desktopCursor.assertIdle();
       ${execute}`);
@@ -97,10 +118,8 @@ const desktopAnalysis=createDocumentAnalysis({
         code: `import { collectTargetEvidence as desktopEvidence } from '@/document-agent/controller';
 import { createCursorBridge } from '@desktop-cursor';
 import { createDocumentAnalysis } from '@desktop-analysis';
+import { navigateToSearchHit } from '@/ui/find-dialog';
 import { InsertTextCommand, DeleteTextCommand } from '@/engine/command';
-let desktopComposing = false;
-document.addEventListener('compositionstart', () => { desktopComposing = true; }, true);
-document.addEventListener('compositionend', () => { desktopComposing = false; }, true);
 ` + transformed, map:null,
       };
     },

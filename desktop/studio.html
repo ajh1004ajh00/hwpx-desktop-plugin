@@ -1,4 +1,7 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>한글메이트</title><link rel="stylesheet" href="./studio.css"></head>
 <body><header><strong>한글메이트</strong><span id="status" role="status">편집기 시작 중…</span></header>
-<p id="notice">문서를 클릭해 직접 입력하세요. 원본은 덮어쓰지 않습니다. 편집·저장 호환성은 시험 중입니다.</p><main id="editor" aria-label="한글 문서 편집기"></main><script type="module" src="./studio.mjs"></script></body></html>
+<p id="notice">문서를 클릭해 직접 입력하세요. 원본은 덮어쓰지 않습니다. 편집·저장 호환성은 시험 중입니다.</p>
+<p id="activity-status" role="status" hidden></p>
+<details id="activity" hidden><summary>최근 AI 변경</summary><p>현재 탭에서 적용한 기록입니다. 이후 직접 편집·실행 취소 결과와 다를 수 있습니다. 되돌리기는 문서에서 실행 취소를 사용하세요.</p><ol id="activity-list"></ol><button id="clear-activity" type="button">표시 기록 지우기</button></details>
+<main id="editor" aria-label="한글 문서 편집기"></main><script type="module" src="./studio.mjs"></script></body></html>
