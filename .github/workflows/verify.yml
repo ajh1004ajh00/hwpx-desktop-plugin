@@ -1,0 +1,23 @@
+name: Windows automated verification
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+      - run: npm run setup
+      - run: npm test
+      - run: node scripts/verify-recovery.mjs
+      - run: npm run verify:package
+      - run: npm audit --omit=dev --prefix desktop
+      # macOS and actual Desktop acceptance are performed by the human team.
