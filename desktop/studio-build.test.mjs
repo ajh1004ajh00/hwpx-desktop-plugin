@@ -29,6 +29,9 @@ test('pinned overlay guards native mutation/history and serializes all document 
       assert.match(output,/const desktopAnalysis=createDocumentAnalysis/);
       assert.match(output,/id==='desktop:analyze-current-table'.*desktopAnalysis\.currentTable/s);
       assert.match(output,/id==='desktop:analyze-document'.*desktopAnalysis\.document/s);
+      assert.match(output,/id==='desktop:apply-char-format'.*desktopCursor\.applyFormat/s);
+      assert.match(output,/new ApplyCharFormatCommand\(start,end,nativeProps\)\.execute\(bridge\)/);
+      assert.match(output,/findOrCreateFontId\(props\.fontFamily\)/);
       assert.match(output,/return desktopCursor.exclusive\(\(\)=>desktopLoadBytes\(\.\.\.args\),false\)/);
       assert.match(output,/return desktopCursor.exclusive\(\(\)=>desktopCreateNewDocument\(\),false\)/);
       assert.match(output,/desktopCursor.assertIdle\(\);\s+return documentAgent.focusTarget/);

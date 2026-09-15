@@ -5,7 +5,9 @@ const activity=document.querySelector('#activity'),list=document.querySelector('
 const errors={DOCUMENT_CHANGED:'문서가 바뀌었습니다. 수정 대상을 다시 읽은 뒤 요청하세요.',CURSOR_CHANGED:'커서 또는 선택 영역이 바뀌었습니다. 대상을 다시 확인하세요.',
   IME_COMPOSING:'한글 입력을 마친 뒤 다시 요청하세요.',EDITOR_BUSY:'편집 작업을 처리 중입니다. 완료 후 다시 요청하세요.',
   SNAPSHOT_EXPIRED:'이전 선택 정보가 만료됐습니다. 대상을 다시 읽어주세요.',TARGET_EXPIRED:'검색 결과가 만료됐습니다. 다시 검색하세요.',
-  COMMAND_REPLAY_MISMATCH:'이전 요청과 상태가 다릅니다. 같은 수정을 반복하지 말고 현재 내용을 확인하세요.'};
+  COMMAND_REPLAY_MISMATCH:'이전 요청과 상태가 다릅니다. 같은 수정을 반복하지 말고 현재 내용을 확인하세요.',
+  EMPTY_SELECTION:'서식을 바꿀 글자를 먼저 선택하세요.',INVALID_FORMAT:'지원하는 글자 서식 값을 확인한 뒤 다시 요청하세요.',
+  FORMAT_POSTIMAGE_MISMATCH:'서식 적용 결과를 확인하지 못해 변경을 되돌렸습니다.'};
 const showActivity=event=>{
   activityStatus.hidden=false;
   if(event.type==='error') {
@@ -15,7 +17,8 @@ const showActivity=event=>{
   const item=document.createElement('li'),title=document.createElement('strong'),before=document.createElement('p'),after=document.createElement('p');
   const excerpt=text=>text.length>300?text.slice(0,300)+'… (일부 표시)':text;
   title.textContent=event.location;
-  before.textContent='이전: '+(excerpt(event.before)||'(커서에 삽입)');after.textContent='변경: '+excerpt(event.after);
+  before.textContent='이전: '+(excerpt(event.before)||'(커서에 삽입)');
+  after.textContent=event.formatSummary?'서식: '+event.formatSummary:'변경: '+excerpt(event.after);
   item.append(title,before,after);list.prepend(item);while(list.children.length>20)list.lastElementChild.remove();
 };
 document.querySelector('#clear-activity').addEventListener('click',()=>{list.replaceChildren();activity.hidden=true;activityStatus.hidden=true;});

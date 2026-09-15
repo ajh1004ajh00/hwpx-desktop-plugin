@@ -103,6 +103,7 @@ HWPX_DESKTOP_PORT=4176 npm start
 | --- | --- |
 | `hwpx_studio_read_selection` | 현재 커서·선택·문서 버전 읽기 |
 | `hwpx_studio_insert_at_cursor` | 읽은 커서에 입력하거나 같은 문단의 선택 텍스트 교체 |
+| `hwpx_studio_apply_char_format` | 선택한 글자의 글꼴·크기·굵게·기울임·밑줄·취소선·색상 변경 |
 | `hwpx_studio_analyze_current_table` | 현재 표의 셀·내용·글꼴·크기 등 분석 |
 | `hwpx_studio_analyze_document` | 본문·표·셀·서식 구간을 페이징해서 분석 |
 | `hwpx_studio_replace_paragraph` | 지원되는 일반 본문 문단 전체 교체 |
@@ -111,7 +112,7 @@ HWPX_DESKTOP_PORT=4176 npm start
 
 AI는 화면 픽셀 대신 Studio의 실제 문서 위치와 스냅샷을 사용합니다.
 사용자가 커서를 옮기거나 문서를 수정하면 오래된 입력 명령을 거부합니다.
-AI 입력과 직접 입력은 같은 문서와 실행 취소 기록을 공유합니다.
+AI 입력·글자 서식과 직접 편집은 같은 문서와 실행 취소 기록을 공유합니다.
 
 ## 플러그인 구성
 
@@ -132,7 +133,7 @@ GPT 코드 검토용 진입점은 [docs/REVIEW.md](docs/REVIEW.md)입니다.
 
 - Studio 파일 메뉴에서 HWP/HWPX 저장 또는 PDF 인쇄를 선택합니다. 실제 생성 파일을 다시 열어 확인하세요.
 - 로컬 파일 선택과 저장처럼 WebMCP가 제공하지 않는 작업에만 브라우저 자동화를 사용합니다.
-- AI 입력은 일반 본문/깊이 1 표 셀의 같은 문단, 한 줄 BMP 텍스트 1–4,000자를 지원합니다.
+- AI 입력과 글자 서식은 일반 본문/깊이 1 표 셀의 같은 문단 안에서 지원합니다. 입력 텍스트는 한 줄 BMP 1–4,000자이고, 글자 서식은 비어 있지 않은 선택 영역에만 적용됩니다.
 - 중첩 표, 보호 셀, 여러 문단/셀 선택, 필드, 머리말·꼬리말·각주·객체 모드,
   줄바꿈/탭·보충 유니코드 입력은 AI 커서 도구에서 거부합니다.
 - 분석은 본문과 최상위 표 중심입니다. 미지원 구조와 개수는 결과에 명시합니다.
@@ -178,4 +179,4 @@ Studio는 커밋 `e8800c8def63449808a4092798442652ed460552`에서 빌드하며 �
 
 ### Sites에서 실제 편집기 열기
 
-본인 전용 [한글메이트 편집기](https://hangulmate-webmcp-poc.gptisgod.chatgpt.site/)에 실제 rhwp 편집기와 WebMCP 5개 도구를 배포했습니다. 이 경로는 방문자 Node/localhost 설치가 필요하지 않습니다. 문서는 브라우저에서 처리하며 자동 복구본이 브라우저 저장소에 남을 수 있습니다. 현재 배포/미검증 범위는 docs/SITES-POC.md에 기록합니다.
+공개 [한글메이트 편집기](https://hangulmate-webmcp-poc.gptisgod.chatgpt.site/)에 실제 rhwp 편집기와 WebMCP 8개 도구를 배포합니다. 이 경로는 방문자 Node/localhost 설치가 필요하지 않습니다. 문서는 브라우저에서 처리하며 자동 복구본이 브라우저 저장소에 남을 수 있습니다. 현재 배포/미검증 범위는 docs/SITES-POC.md에 기록합니다.

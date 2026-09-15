@@ -67,6 +67,16 @@ const desktopCursor = createCursorBridge({
     if (end.charOffset>start.charOffset) new DeleteTextCommand(start,end.charOffset-start.charOffset,'forward').execute(bridge);
     return new InsertTextCommand(start,text).execute(bridge);
   },
+  format:(bridge,start,end,props) => {
+    const nativeProps={...props};
+    if (props.fontFamily!==undefined) {
+      const fontId=bridge.findOrCreateFontId(props.fontFamily);
+      if (!Number.isSafeInteger(fontId) || fontId<0) throw new Error('FONT_UNAVAILABLE');
+      delete nativeProps.fontFamily;
+      nativeProps.fontId=fontId;
+    }
+    return new ApplyCharFormatCommand(start,end,nativeProps).execute(bridge);
+  },
   lock:()=>{
     const root=document.getElementById('studio-root')!;
     const input=inputHandler;
@@ -110,6 +120,7 @@ const desktopAnalysis=createDocumentAnalysis({
       if (id==='desktop:find-targets') return desktopAnalysis.search(params);
       if (id==='desktop:focus-target') return desktopAnalysis.focus(params);
       if (id==='desktop:insert-text') return desktopCursor.apply(params);
+      if (id==='desktop:apply-char-format') return desktopCursor.applyFormat(params);
       desktopCursor.assertIdle();
       ${execute}`);
       transformed=replaceOnce(transformed,'return documentAgent.revertTextCommand(command);','return desktopCursor.exclusive(()=>documentAgent!.revertTextCommand(command));');
@@ -119,7 +130,7 @@ const desktopAnalysis=createDocumentAnalysis({
 import { createCursorBridge } from '@desktop-cursor';
 import { createDocumentAnalysis } from '@desktop-analysis';
 import { navigateToSearchHit } from '@/ui/find-dialog';
-import { InsertTextCommand, DeleteTextCommand } from '@/engine/command';
+import { InsertTextCommand, DeleteTextCommand, ApplyCharFormatCommand } from '@/engine/command';
 ` + transformed, map:null,
       };
     },

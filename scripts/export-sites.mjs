@@ -1,4 +1,4 @@
-import {cp, mkdir, readFile, writeFile} from 'node:fs/promises';
+import {cp, mkdir, readFile, rm, writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {verifyPackage} from './verify-package.mjs';
 
@@ -10,6 +10,7 @@ const hosting=JSON.parse(await readFile(resolve(destination,'.openai/hosting.jso
 if(!hosting.project_id || hosting.static?.directory!=='dist') throw new Error('Expected registered static Site');
 await verifyPackage(root);
 const dist=resolve(destination,'dist');
+await rm(dist,{recursive:true,force:true});
 await mkdir(dist,{recursive:true});
 await cp(resolve(root,'desktop/.runtime/studio'),resolve(dist,'studio'),{recursive:true});
 await mkdir(resolve(dist,'vendor/editor'),{recursive:true});
