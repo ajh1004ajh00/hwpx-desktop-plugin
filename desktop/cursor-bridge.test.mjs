@@ -38,23 +38,33 @@ test('exclusive lock failures do not permanently busy the editor', async () => {
   assert.doesNotThrow(bridge.assertIdle);
 });
 
-function harness() {
-  const model={text:'가나다라',offset:2,seq:0,locked:false,render:async()=>{}};
+function harness(options={}) {
+  const model={text:'가나다라',offset:2,seq:0,locked:false,render:async()=>{},selection:undefined,
+    formats:Array.from({length:4},()=>({fontFamily:'함초롬바탕',fontSize:1000,bold:false,italic:false,underline:false,strikethrough:false,textColor:'#000000'}))};
+  const basePosition=options.cell
+    ? {sectionIndex:0,paragraphIndex:1,parentParaIndex:1,controlIndex:0,cellIndex:2,cellParaIndex:0,cellPath:[{controlIndex:0,cellIndex:2,cellParaIndex:0}]}
+    : {sectionIndex:0,paragraphIndex:1};
   const wasm={pageCount:1,getParagraphLength:()=>model.text.length,getTextRange:()=>model.text,
-    getControlTextPositions:()=>[],getFieldInfoAt:()=>({inField:false}),fileName:'trial.hwpx'};
-  const raw=()=>({position:{sectionIndex:0,paragraphIndex:1,charOffset:model.offset}});
+    getControlTextPositions:()=>[],getFieldInfoAt:()=>({inField:false}),getCharPropertiesAt:(_s,_p,offset)=>model.formats[offset],
+    getCellParagraphLengthByPath:()=>model.text.length,getTextInCellByPath:(_s,_p,_path,start,end)=>model.text.slice(start,end),
+    getCellCharPropertiesAtByPath:(_s,_p,_path,offset)=>model.formats[offset],getCellProperties:()=>({cellProtect:false}),
+    getCellInfo:()=>({row:0,col:2,rowSpan:1,colSpan:1}),fileName:'trial.hwpx'};
+  const raw=()=>({position:{...basePosition,charOffset:model.offset},...(model.selection?{selection:model.selection}:{})});
   const input={getDesktopCursorContext:raw,executeDocumentAgentOperation:async(desc,render)=>{
     // Contract adapter only; actual native edit/undo is exercised in the browser.
-    const saved={text:model.text,offset:model.offset};
-    try { const next=desc.operation(wasm); await render(); model.offset=next.charOffset; model.seq++; }
+    const saved={text:model.text,offset:model.offset,selection:model.selection,formats:structuredClone(model.formats)};
+    try { const next=desc.operation(wasm); await render(); model.offset=next.charOffset;model.selection=undefined;model.seq++; }
     catch(e){Object.assign(model,saved);throw e;}
   }};
   const bridge=createCursorBridge({
     getEnvironment:()=>({wasm,input,agent:{getDocumentState:()=>({documentEpoch:1,changeSeq:model.seq,documentSha256:model.text})},render:()=>model.render(),composing:false}),
     mutate:(_wasm,start,end,text)=>{model.text=model.text.slice(0,start.charOffset)+text+model.text.slice(end.charOffset);return {...start,charOffset:start.charOffset+text.length};},
+    format:(_wasm,start,end,props)=>options.format
+      ? options.format(model,start,end,props)
+      : (model.formats.splice(start.charOffset,end.charOffset-start.charOffset,...model.formats.slice(start.charOffset,end.charOffset).map(value=>({...value,...props}))),start),
     lock:()=>{model.locked=true;return ()=>{model.locked=false;};},
   });
-  return {model,wasm,raw,bridge};
+  return {model,wasm,raw,bridge,positionAt:charOffset=>({...basePosition,charOffset})};
 }
 test('native bridge contract inserts once, rejects replay changes and stale cursor', async()=>{
   const {bridge,model}=harness();
@@ -68,6 +78,37 @@ test('native bridge contract inserts once, rejects replay changes and stale curs
   const next=bridge.read(); model.offset--;
   await assert.rejects(bridge.apply({...command,token:next.cursor.token,commandId:'two'}),/CURSOR_CHANGED/);
   assert.equal(model.text,'가나AI다라');
+});
+test('native bridge formats the exact non-empty selection once without changing text',async()=>{
+  const {bridge,model}=harness();
+  model.selection={start:{sectionIndex:0,paragraphIndex:1,charOffset:1},end:{sectionIndex:0,paragraphIndex:1,charOffset:3}};
+  const snapshot=bridge.read();
+  assert.equal(snapshot.cursor.selectedText,'나다');
+  assert.ok(typeof bridge.applyFormat==='function','the native bridge must expose character formatting');
+  const command={token:snapshot.cursor.token,commandId:'format-one',props:{fontFamily:'맑은 고딕',fontSize:1600,bold:true,textColor:'#1A2B3C'}};
+  const receipt=await bridge.applyFormat(command);
+  assert.equal(model.text,'가나다라');assert.equal(model.seq,1);
+  assert.deepEqual(model.formats.slice(1,3),Array(2).fill({fontFamily:'맑은 고딕',fontSize:1600,bold:true,italic:false,underline:false,strikethrough:false,textColor:'#1A2B3C'}));
+  assert.equal(model.formats[0].bold,false);assert.equal(model.formats[3].bold,false);
+  assert.deepEqual(await bridge.applyFormat(command),receipt);assert.equal(model.seq,1);
+  await assert.rejects(bridge.applyFormat({...command,props:{bold:false}}),/REPLAY/);
+});
+test('character-format postimage mismatch rolls back without a receipt',async()=>{
+  const {bridge,model}=harness({format:(state,start,_end,props)=>{state.formats[start.charOffset]={...state.formats[start.charOffset],...props};return start;}});
+  model.selection={start:{sectionIndex:0,paragraphIndex:1,charOffset:1},end:{sectionIndex:0,paragraphIndex:1,charOffset:3}};
+  const before=structuredClone(model.formats),snapshot=bridge.read();
+  const command={token:snapshot.cursor.token,commandId:'format-bad',props:{bold:true}};
+  await assert.rejects(bridge.applyFormat(command),/FORMAT_POSTIMAGE_MISMATCH/);
+  assert.deepEqual(model.formats,before);assert.equal(model.seq,0);assert.equal(model.locked,false);
+});
+test('native bridge formats a root table cell through its exact path',async()=>{
+  const {bridge,model,positionAt}=harness({cell:true});
+  model.selection={start:positionAt(1),end:positionAt(3)};
+  const snapshot=bridge.read();
+  assert.deepEqual(snapshot.cursor.cell,{row:1,column:3,rowSpan:1,columnSpan:1});
+  await bridge.applyFormat({token:snapshot.cursor.token,commandId:'format-cell',props:{underline:true}});
+  assert.deepEqual(model.formats.map(value=>value.underline),[false,true,true,false]);
+  assert.equal(model.text,'가나다라');
 });
 test('render wait excludes concurrent commands and failure releases lock without receipt', async()=>{
   const {bridge,model}=harness();

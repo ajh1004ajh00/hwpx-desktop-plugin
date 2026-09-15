@@ -49,7 +49,7 @@ test('Studio registers paged read-only table and document analysis bound to a sn
     execute:async(id,params)=>{calls.push({id,params});return {ok:true};},
   }};
   await registerStudioTools({registerTool:tool=>tools.set(tool.name,tool)},editor);
-  assert.equal(tools.size,7);
+  assert.equal(tools.size,8);
   const read=await tools.get('hwpx_studio_read_selection').execute({});
   const tableTool=tools.get('hwpx_studio_analyze_current_table');
   const documentTool=tools.get('hwpx_studio_analyze_document');
@@ -85,6 +85,28 @@ test('selection response excludes filename, surrounding text and internal eviden
   assert.equal(calls[2].expectedDocumentSha256,'a'.repeat(64));
 });
 
+test('character formatting uses the selected snapshot and returns a minimal receipt', async () => {
+  const tools=new Map(),calls=[],events=[];
+  const privateSnapshot={...snapshot,cursor:{token:'PRIVATE_TOKEN',editable:true,collapsed:false,
+    selectedText:'선택 내용',position:{sectionIndex:0,paragraphIndex:1,charOffset:0}}};
+  const editor={commands:{context:async()=>({desktopSnapshot:privateSnapshot}),execute:async(name,args)=>{
+    calls.push({name,args});return {command_id:args.commandId,status:'applied'};
+  }}};
+  await registerStudioTools({registerTool:tool=>tools.set(tool.name,tool)},editor,event=>events.push(event));
+  const read=await tools.get('hwpx_studio_read_selection').execute({});
+  const format=tools.get('hwpx_studio_apply_char_format');
+  assert.ok(format,'the native character-format tool must be registered');
+  const result=await format.execute({snapshot_id:read.snapshot_id,command_id:'fmt-1',
+    font_family:'맑은 고딕',font_size_pt:16,bold:true,italic:false,underline:true,strikethrough:false,text_color:'#1a2b3c'});
+  assert.deepEqual(result,{command_id:'fmt-1',status:'applied',saved:false});
+  assert.deepEqual(calls,[{name:'desktop:apply-char-format',args:{token:'PRIVATE_TOKEN',commandId:'fmt-1',props:{
+    fontFamily:'맑은 고딕',fontSize:1600,bold:true,italic:false,underline:true,strikethrough:false,textColor:'#1A2B3C',
+  }}}]);
+  assert.doesNotMatch(JSON.stringify(result),/선택 내용|PRIVATE/);
+  assert.deepEqual(events,[{type:'applied',location:'구역 1 · 문단 2',before:'선택 내용',after:'선택 내용',
+    formatSummary:'글꼴 맑은 고딕 · 16pt · 굵게 · 기울임 해제 · 밑줄 · 취소선 해제 · 글자색 #1A2B3C'}]);
+});
+
 test('tool errors preserve known recovery codes without echoing document text', async () => {
   const tools=new Map();
   const editor={commands:{context:async()=>{throw new Error('DOCUMENT_CHANGED: PRIVATE_ERROR');}}};
@@ -95,7 +117,16 @@ test('tool errors preserve known recovery codes without echoing document text', 
   await assert.rejects(tools.get('hwpx_studio_read_selection').execute({}),/^Error: TOOL_FAILED$/);
 });
 
-for (const failAt of [1,3,7]) test(`registration failure ${failAt} aborts tools and allows a clean retry`, async () => {
+test('selection read exposes only a safe cursor recovery reason',async()=>{
+  const tools=new Map();
+  const privateSnapshot={...snapshot,cursor:{editable:false,collapsed:false,selectedText:'',reason:'OFFSET_OUT_OF_RANGE: PRIVATE_DETAIL'}};
+  await registerStudioTools({registerTool:tool=>tools.set(tool.name,tool)},{commands:{context:async()=>({desktopSnapshot:privateSnapshot})}});
+  const read=await tools.get('hwpx_studio_read_selection').execute({});
+  assert.deepEqual(read.cursor,{editable:false,collapsed:false,selectedText:'',reason:'OFFSET_OUT_OF_RANGE'});
+  assert.doesNotMatch(JSON.stringify(read),/PRIVATE_DETAIL/);
+});
+
+for (const failAt of [1,4,8]) test(`registration failure ${failAt} aborts tools and allows a clean retry`, async () => {
   const tools=new Map();let count=0;
   const host={registerTool(tool,{signal}={}) {
     if(++count===failAt) throw new Error('registration failed');
@@ -105,7 +136,7 @@ for (const failAt of [1,3,7]) test(`registration failure ${failAt} aborts tools 
   await assert.rejects(registerStudioTools(host,{}),/registration failed/);
   assert.equal(tools.size,0);
   const session=await registerStudioTools(host,{});
-  assert.equal(tools.size,7);
+  assert.equal(tools.size,8);
   await session.dispose();assert.equal(tools.size,0);
 });
 

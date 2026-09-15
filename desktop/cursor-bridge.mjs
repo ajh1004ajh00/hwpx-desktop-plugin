@@ -30,6 +30,31 @@ export function validateCursorText(text) {
   if (typeof text !== 'string' || !text.length || text.length > 4000 || /[\u0000-\u001f\u007f\uD800-\uDFFF]/.test(text)) fail('UNSUPPORTED_TEXT: use one line, 1–4000 BMP characters');
   return text;
 }
+export function validateCharFormatProps(value) {
+  if (!value || typeof value!=='object' || Array.isArray(value)) fail('INVALID_FORMAT');
+  const allowed=['fontFamily','fontSize','bold','italic','underline','strikethrough','textColor'];
+  if (!Object.keys(value).length || Object.keys(value).some(key=>!allowed.includes(key))) fail('INVALID_FORMAT');
+  const result={};
+  if (value.fontFamily!==undefined) {
+    if (typeof value.fontFamily!=='string' || value.fontFamily.trim()!==value.fontFamily || value.fontFamily.length<1 || value.fontFamily.length>128 || /[\u0000-\u001F\u007F\uD800-\uDFFF]/u.test(value.fontFamily)) fail('INVALID_FORMAT');
+    result.fontFamily=value.fontFamily;
+  }
+  if (value.fontSize!==undefined) {
+    if (!Number.isSafeInteger(value.fontSize) || value.fontSize<100 || value.fontSize>409600) fail('INVALID_FORMAT');
+    result.fontSize=value.fontSize;
+  }
+  for (const key of ['bold','italic','underline','strikethrough']) {
+    if (value[key]!==undefined) {
+      if (typeof value[key]!=='boolean') fail('INVALID_FORMAT');
+      result[key]=value[key];
+    }
+  }
+  if (value.textColor!==undefined) {
+    if (typeof value.textColor!=='string' || !/^#[0-9A-F]{6}$/.test(value.textColor)) fail('INVALID_FORMAT');
+    result.textColor=value.textColor;
+  }
+  return result;
+}
 export function assertCursorFence(expected,current) {
   if (expected.composing || current.composing) fail('IME_COMPOSING: 한글 입력 조합을 마친 뒤 다시 읽어주세요.');
   if (!expected.cursor.editable || !current.cursor.editable) fail('UNSUPPORTED_CURSOR');
@@ -82,7 +107,13 @@ export function describeCursor(wasm,raw) {
   return result;
 }
 
-export function createCursorBridge({getEnvironment,mutate,lock}) {
+const charPropertiesAt=(wasm,position,offset)=>position.parentParaIndex!==undefined
+  ? wasm.getCellCharPropertiesAtByPath(position.sectionIndex,position.parentParaIndex,JSON.stringify(position.cellPath),offset)
+  : wasm.getCharPropertiesAt(position.sectionIndex,position.paragraphIndex,offset);
+const formatMatches=(actual,expected)=>Object.entries(expected).every(([key,value])=>
+  key==='textColor' ? String(actual?.[key]??'').toUpperCase()===value : actual?.[key]===value);
+
+export function createCursorBridge({getEnvironment,mutate,format,lock}) {
   const snapshots=new Map(),journal=new Map();
   let busy=false;
   const assertIdle=() => { if (busy) fail('EDITOR_BUSY'); };
@@ -135,6 +166,50 @@ export function createCursorBridge({getEnvironment,mutate,lock}) {
         const receipt={command_id:command.commandId,operation:expected.cursor.collapsed?'insert_at_cursor':'replace_selection',inserted_text:command.text,replaced_text:selectedText,before:expected.state,after:after.state,cursor:after.cursor};
         journal.set(command.commandId,{binding,receipt,after});
         if (journal.size>32) journal.delete(journal.keys().next().value);
+        return receipt;
+      });
+    },
+    applyFormat(command) {
+      return exclusive(async()=>{
+        if (!command || Object.keys(command).sort().join(',')!=='commandId,props,token') fail('INVALID_CURSOR_COMMAND');
+        for (const key of ['commandId','token']) if (typeof command[key]!=='string' || !command[key].length || command[key].length>128) fail('INVALID_CURSOR_COMMAND');
+        const props=validateCharFormatProps(command.props);
+        const binding=JSON.stringify({kind:'format',commandId:command.commandId,token:command.token,props});
+        const replay=journal.get(command.commandId);
+        if (replay) {
+          const now=rawRead();
+          if (replay.binding!==binding || !equal(now.state,replay.after.state)) fail('COMMAND_REPLAY_MISMATCH');
+          return replay.receipt;
+        }
+        const expected=snapshots.get(command.token);
+        if (!expected) fail('CURSOR_SNAPSHOT_EXPIRED');
+        assertCursorFence(expected,rawRead());
+        const {start,end,paragraphText:beforeText}=expected.cursor;
+        if (expected.cursor.collapsed || start.charOffset===end.charOffset) fail('EMPTY_SELECTION');
+        const env=getEnvironment();
+        const beforeState=expected.state;
+        const alreadyMatches=Array.from({length:end.charOffset-start.charOffset},(_,index)=>start.charOffset+index)
+          .every(offset=>formatMatches(charPropertiesAt(env.wasm,start,offset),props));
+        if (!alreadyMatches) {
+          if (typeof format!=='function') fail('FORMAT_UNAVAILABLE');
+          await env.input.executeDocumentAgentOperation({
+            kind:'snapshot',operationType:'desktop-char-format',
+            operation:wasm=>{
+              assertCursorFence(expected,rawRead());
+              const next=format(wasm,start,end,props);
+              wasm.flushDeferredPagination?.();
+              if (paragraphText(wasm,start)!==beforeText) fail('FORMAT_POSTIMAGE_MISMATCH');
+              for(let offset=start.charOffset;offset<end.charOffset;offset++) {
+                if(!formatMatches(charPropertiesAt(wasm,start,offset),props)) fail('FORMAT_POSTIMAGE_MISMATCH');
+              }
+              return next;
+            },
+          },env.render);
+        }
+        const after=rawRead();
+        const receipt={command_id:command.commandId,operation:'format_selection',before:beforeState,after:after.state,cursor:after.cursor};
+        journal.set(command.commandId,{binding,receipt,after});
+        if(journal.size>32)journal.delete(journal.keys().next().value);
         return receipt;
       });
     },

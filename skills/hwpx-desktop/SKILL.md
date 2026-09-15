@@ -53,6 +53,11 @@ snapshot_id를 읽는다. 파일 선택의 성공은 파일 열기 작업과 사
 - 현재 위치 입력: `hwpx_studio_insert_at_cursor`에 snapshot_id, 새로운 command_id,
   text를 전달한다. `cursor.editable`을 확인한다. 선택 영역이 있으면 그 텍스트만 교체한다.
   동일 요청의 재시도에만 같은 command_id와 같은 인자를 사용한다.
+- 선택 영역 글자 서식: 비어 있지 않은 선택을 새 `read_selection`으로 확인한 뒤
+  `hwpx_studio_apply_char_format`에 snapshot_id, 새로운 command_id와 필요한 항목만 전달한다.
+  항목은 font_family, font_size_pt, bold, italic, underline, strikethrough, text_color(`#RRGGBB`)다.
+  일반 본문과 깊이 1 표 셀의 같은 문단 선택을 지원한다. 도구는 글꼴을 설치하지 않으며,
+  성공 후 다시 읽거나 표·문서 분석으로 대상 텍스트와 서식을 확인한다.
 - 현재 표 분석: `hwpx_studio_analyze_current_table`에 snapshot_id, offset, limit를 전달한다.
 - 전체 문서 분석: `hwpx_studio_analyze_document`에 같은 인자를 전달한다.
   limit는 1–50이다. 한 응답은 최대 512 텍스트 단위/서식 조회, 50개 문단 조각, JSON 256 KiB로 제한한다. `next`가 있으면 같은 `snapshot_id`와 `limit`에 `next.offset`, `next.paragraphOffset`, `next.textOffset`을 전달해 이어 읽는다. `nextOffset`만 사용하면 문단/셀 내부 위치를 잃으므로 사용하지 않는다. `next: null`은 해당 분석 범위의 끝이며 지원하지 않는 객체까지 분석했다는 뜻은 아니다. 일부 결과를 문서 전체로 보고하지 않는다.
@@ -68,13 +73,13 @@ TOOL_FAILED처럼 결과가 불확실하면 새 command_id로 곧바로 반복�
 SNAPSHOT_EXPIRED이면 다시 읽고 대상이 원래 요청과 일치하는지 확인한다.
 이전 위치에 맞춘 명령을 새 위치로 자동 재적용하지 말고 사용자 요청과 대조한다.
 지원하지 않는 편집을 XML 패치, 좌표 추정 또는 별도 문서 모델로 우회하지 않는다.
-Computer Use는 로컬 파일 선택, WebMCP가 제공하지 않는 편집·서식 기능, 저장·다운로드,
+Computer Use는 로컬 파일 선택, WebMCP가 제공하지 않는 문단·표 등 나머지 편집 기능, 저장·다운로드,
 사용자가 요청한 화면 확인에만 사용한다.
 
 ## 지원 범위와 저장
 
-AI 커서 입력: 일반 본문 또는 깊이 1의 일반 표 셀, 같은 문단 안의 선택 영역,
-한 줄 BMP 텍스트 1–4,000자. 여러 문단/셀에 걸친 선택, 중첩 표, 보호 셀, 필드,
+AI 커서 입력과 선택 글자 서식: 일반 본문 또는 깊이 1의 일반 표 셀, 같은 문단 안의 선택 영역.
+입력은 한 줄 BMP 텍스트 1–4,000자이고 글자 서식은 비어 있지 않은 선택이 필요하다. 여러 문단/셀에 걸친 선택, 중첩 표, 보호 셀, 필드,
 머리말·꼬리말·각주·객체 모드, 줄바꿈/탭, 보충 유니코드는 지원하지 않는다.
 표/문서 분석은 rhwp 모델의 텍스트와 글꼴·크기·색상 등 서식 구간을 읽는다.
 지원하지 않는 구조는 도구가 반환한 한계대로 보고한다.
