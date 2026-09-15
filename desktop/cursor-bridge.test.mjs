@@ -41,9 +41,15 @@ test('exclusive lock failures do not permanently busy the editor', async () => {
 function harness(options={}) {
   const model={text:'가나다라',offset:2,seq:0,locked:false,render:async()=>{},selection:undefined,
     formats:Array.from({length:4},()=>({fontFamily:'함초롬바탕',fontSize:1000,bold:false,italic:false,underline:false,strikethrough:false,textColor:'#000000'}))};
+  const basePosition=options.cell
+    ? {sectionIndex:0,paragraphIndex:1,parentParaIndex:1,controlIndex:0,cellIndex:2,cellParaIndex:0,cellPath:[{controlIndex:0,cellIndex:2,cellParaIndex:0}]}
+    : {sectionIndex:0,paragraphIndex:1};
   const wasm={pageCount:1,getParagraphLength:()=>model.text.length,getTextRange:()=>model.text,
-    getControlTextPositions:()=>[],getFieldInfoAt:()=>({inField:false}),getCharPropertiesAt:(_s,_p,offset)=>model.formats[offset],fileName:'trial.hwpx'};
-  const raw=()=>({position:{sectionIndex:0,paragraphIndex:1,charOffset:model.offset},...(model.selection?{selection:model.selection}:{})});
+    getControlTextPositions:()=>[],getFieldInfoAt:()=>({inField:false}),getCharPropertiesAt:(_s,_p,offset)=>model.formats[offset],
+    getCellParagraphLengthByPath:()=>model.text.length,getTextInCellByPath:(_s,_p,_path,start,end)=>model.text.slice(start,end),
+    getCellCharPropertiesAtByPath:(_s,_p,_path,offset)=>model.formats[offset],getCellProperties:()=>({cellProtect:false}),
+    getCellInfo:()=>({row:0,col:2,rowSpan:1,colSpan:1}),fileName:'trial.hwpx'};
+  const raw=()=>({position:{...basePosition,charOffset:model.offset},...(model.selection?{selection:model.selection}:{})});
   const input={getDesktopCursorContext:raw,executeDocumentAgentOperation:async(desc,render)=>{
     // Contract adapter only; actual native edit/undo is exercised in the browser.
     const saved={text:model.text,offset:model.offset,selection:model.selection,formats:structuredClone(model.formats)};
@@ -58,7 +64,7 @@ function harness(options={}) {
       : (model.formats.splice(start.charOffset,end.charOffset-start.charOffset,...model.formats.slice(start.charOffset,end.charOffset).map(value=>({...value,...props}))),start),
     lock:()=>{model.locked=true;return ()=>{model.locked=false;};},
   });
-  return {model,wasm,raw,bridge};
+  return {model,wasm,raw,bridge,positionAt:charOffset=>({...basePosition,charOffset})};
 }
 test('native bridge contract inserts once, rejects replay changes and stale cursor', async()=>{
   const {bridge,model}=harness();
@@ -94,6 +100,15 @@ test('character-format postimage mismatch rolls back without a receipt',async()=
   const command={token:snapshot.cursor.token,commandId:'format-bad',props:{bold:true}};
   await assert.rejects(bridge.applyFormat(command),/FORMAT_POSTIMAGE_MISMATCH/);
   assert.deepEqual(model.formats,before);assert.equal(model.seq,0);assert.equal(model.locked,false);
+});
+test('native bridge formats a root table cell through its exact path',async()=>{
+  const {bridge,model,positionAt}=harness({cell:true});
+  model.selection={start:positionAt(1),end:positionAt(3)};
+  const snapshot=bridge.read();
+  assert.deepEqual(snapshot.cursor.cell,{row:1,column:3,rowSpan:1,columnSpan:1});
+  await bridge.applyFormat({token:snapshot.cursor.token,commandId:'format-cell',props:{underline:true}});
+  assert.deepEqual(model.formats.map(value=>value.underline),[false,true,true,false]);
+  assert.equal(model.text,'가나다라');
 });
 test('render wait excludes concurrent commands and failure releases lock without receipt', async()=>{
   const {bridge,model}=harness();
