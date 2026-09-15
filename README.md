@@ -13,6 +13,8 @@
 
 ## 함께 작업하는 방법
 
+![사용자와 AI가 같은 문서를 함께 편집하고 결과를 저장하는 사용 흐름](docs/images/hangulmate-architecture-ko.png)
+
 기본 이용 경로는 [공개 Sites 편집기](https://hangulmate-webmcp-poc.gptisgod.chatgpt.site/)와 최신 플러그인입니다. Node.js/Git/로컬 서버 설치 없이 시작합니다. [새 사용자 안내](docs/SITES-QUICKSTART.md)를 참고하세요. 아래 개발용 설치는 로컬 개발을 선택한 경우에만 해당합니다.
 
 목표 경험은 **파일 열기 → 위치 확인 → GPT와 수정 → 직접 보완 → 저장·재열기**입니다.
@@ -115,6 +117,19 @@ AI는 화면 픽셀 대신 Studio의 실제 문서 위치와 스냅샷을 사용
 AI 입력·글자 서식과 직접 편집은 같은 문서와 실행 취소 기록을 공유합니다.
 
 ## 플러그인 구성
+
+![플러그인 Skill의 안내·규칙과 Sites 편집기의 WebMCP 도구 8개 실행 구조](docs/images/hangulmate-plugin-architecture-ko.png)
+
+플러그인의 Skill은 Sites URL, 도구 이름·사용 순서, 데이터 최소화 규칙과 Computer Use 사용 조건을 안내합니다.
+실제 WebMCP 도구 8개는 공개 Sites 편집기 페이지에서 등록·실행됩니다.
+
+<details>
+<summary>구조도 편집용 SVG</summary>
+
+- [공동 편집 사용 흐름](docs/images/hangulmate-architecture-ko.svg)
+- [플러그인·Sites 편집기 구조](docs/images/hangulmate-plugin-architecture-ko.svg)
+
+</details>
 
 `.codex-plugin/plugin.json`과 `skills/hwpx-desktop/SKILL.md`가 포함된 skill 기반 플러그인입니다.
 스킬은 서버 실행과 내장 브라우저에서 실제 도구를 사용하는 방법을 안내합니다.
