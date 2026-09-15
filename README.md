@@ -11,7 +11,7 @@
 
 ![사용자와 AI가 같은 문서를 함께 편집하고 저장하는 흐름](docs/images/hangulmate-architecture-ko.png)
 
-한글메이트 플러그인을 설치한 뒤 새 대화에서 **“한글메이트 열어줘”**라고 요청하면 바로 시작합니다. [시작 안내](docs/SITES-QUICKSTART.md)를 참고하세요.
+ChatGPT Desktop에서 한글메이트 플러그인을 설치한 뒤 새 대화에서 **“한글메이트 열어줘”**라고 요청하면 바로 시작합니다. [시작 안내](docs/SITES-QUICKSTART.md)를 참고하세요.
 
 1. 편집기의 **파일 → 열기**에서 HWP/HWPX 파일을 선택합니다.
 2. 수정할 곳에 커서를 놓거나 텍스트를 선택한 뒤 AI에게 요청합니다.
