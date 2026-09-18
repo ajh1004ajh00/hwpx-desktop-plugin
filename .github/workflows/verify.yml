@@ -20,4 +20,5 @@ jobs:
       - run: node scripts/verify-recovery.mjs
       - run: npm run verify:package
       - run: npm audit --omit=dev --prefix desktop
+      - run: npm audit --prefix desktop/.runtime/rhwp/rhwp-studio
       # macOS and actual Desktop acceptance are performed by the human team.

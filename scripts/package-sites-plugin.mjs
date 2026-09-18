@@ -5,7 +5,7 @@ import {execFileSync} from 'node:child_process';
 const root=resolve(import.meta.dirname,'..');
 const destination=resolve(process.argv[2]??'');
 if(!process.argv[2]||basename(destination)!=='hwpx-desktop-plugin'||destination===root)throw Error('Supply a separate hwpx-desktop-plugin output directory');
-const files={'.codex-plugin/plugin.json':'.codex-plugin/plugin.json','skills/hwpx-desktop/SKILL.md':'skills/hwpx-desktop/SKILL.md','README.md':'docs/SITES-QUICKSTART.md','LICENSE':'LICENSE','docs/DATA-POLICY.md':'docs/DATA-POLICY.md'};
+const files={'.codex-plugin/plugin.json':'.codex-plugin/plugin.json','skills/hwpx-desktop/SKILL.md':'skills/hwpx-desktop/SKILL.md','README.md':'docs/SITES-QUICKSTART.md','LICENSE':'LICENSE','THIRD_PARTY_NOTICES.md':'THIRD_PARTY_NOTICES.md','docs/DATA-POLICY.md':'docs/DATA-POLICY.md','docs/PRIVACY.md':'docs/PRIVACY.md','docs/TERMS.md':'docs/TERMS.md','docs/SUPPORT.md':'docs/SUPPORT.md','docs/SITES-QUICKSTART.md':'docs/SITES-QUICKSTART.md','assets/logo.png':'assets/logo.png'};
 const inventory=[];
 for(const [name,source] of Object.entries(files)){
   const bytes=await readFile(resolve(root,source));await mkdir(dirname(resolve(destination,name)),{recursive:true});await copyFile(resolve(root,source),resolve(destination,name));
