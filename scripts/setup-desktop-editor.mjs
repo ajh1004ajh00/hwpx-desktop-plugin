@@ -17,6 +17,14 @@ try { await access(resolve(source, '.git')); } catch {
 }
 const head = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: source, encoding: 'utf8', windowsHide: true });
 if (head.stdout.trim() !== revision) throw new Error('Unexpected Studio revision; refusing to overwrite this checkout.');
+// Pin the reviewed build-tool security updates without moving the document engine revision.
+const lockPatch=resolve(root,'scripts/patches/studio-build-lock.patch');
+const patchCheck=spawnSync('git',['apply','--check',lockPatch],{cwd:source,windowsHide:true});
+if(patchCheck.status===0) run('git',['apply',lockPatch],source);
+else {
+  const applied=spawnSync('git',['apply','--reverse','--check',lockPatch],{cwd:source,windowsHide:true});
+  if(applied.status!==0) throw new Error('Unexpected upstream build lock; refusing to replace local changes.');
+}
 if (!process.argv.includes('--build-only')) {
   run('npm', ['ci', '--ignore-scripts', '--prefix', 'desktop']);
   run('npm', ['ci', '--ignore-scripts'], resolve(source, 'rhwp-studio'));

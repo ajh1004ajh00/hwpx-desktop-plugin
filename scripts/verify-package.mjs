@@ -8,9 +8,10 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 export async function verifyPackage(directory=root,{expected}={}) {
   const base=await realpath(directory);
   const files=new Set([
-    '.codex-plugin/plugin.json','package.json','README.md','LICENSE','THIRD_PARTY_NOTICES.md',
+    '.codex-plugin/plugin.json','package.json','README.md','LICENSE','THIRD_PARTY_NOTICES.md','assets/logo.png',
+    'docs/PRIVACY.md','docs/TERMS.md','docs/SUPPORT.md','docs/SITES-QUICKSTART.md',
     'docs/DATA-POLICY.md','docs/REVIEW-HANDOFF.md','docs/MILESTONE-STATUS.md',
-    'skills/hwpx-desktop/SKILL.md','scripts/start-desktop.mjs','scripts/setup-desktop-editor.mjs','scripts/verify-package.mjs','scripts/benchmark-analysis.mjs',
+    'skills/hwpx-desktop/SKILL.md','scripts/start-desktop.mjs','scripts/setup-desktop-editor.mjs','scripts/patches/studio-build-lock.patch','scripts/verify-package.mjs','scripts/benchmark-analysis.mjs',
     'desktop/package.json','desktop/package-lock.json','desktop/server.mjs','desktop/studio.html',
     'desktop/studio.mjs','desktop/studio-tools.mjs','desktop/studio.css','desktop/cursor-bridge.mjs',
     'desktop/document-analysis.mjs','desktop/studio-build.config.mjs',

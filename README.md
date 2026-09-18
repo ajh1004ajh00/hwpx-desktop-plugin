@@ -7,6 +7,8 @@
 
 [편집기 열기](https://hangulmate-webmcp-poc.gptisgod.chatgpt.site/) · [시작·설치 안내](docs/SITES-QUICKSTART.md) · [개발 현황](https://github.com/users/ajh1004ajh00/projects/2) · [문제 제보](https://github.com/ajh1004ajh00/hwpx-desktop-plugin/issues)
 
+개발자 **AnJuHyun** · [지원](docs/SUPPORT.md) · [개인정보 안내](docs/PRIVACY.md) · [이용약관](docs/TERMS.md)
+
 ## 사용하기
 
 ![사용자와 AI가 같은 문서를 함께 편집하고 저장하는 흐름](docs/images/hangulmate-architecture-ko.png)

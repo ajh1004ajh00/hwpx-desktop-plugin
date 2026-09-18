@@ -11,7 +11,7 @@ test('Sites archive includes license notices and only the visitor bundle, with m
   try {
     // Run the real CLI in an isolated source tree so npm test cannot overwrite a release archive.
     const source=join(temp,'source');
-    for(const name of ['scripts/package-sites-plugin.mjs','.codex-plugin/plugin.json','skills/hwpx-desktop/SKILL.md','docs/SITES-QUICKSTART.md','LICENSE','THIRD_PARTY_NOTICES.md','docs/DATA-POLICY.md']) {
+    for(const name of ['scripts/package-sites-plugin.mjs','.codex-plugin/plugin.json','skills/hwpx-desktop/SKILL.md','docs/SITES-QUICKSTART.md','LICENSE','THIRD_PARTY_NOTICES.md','docs/DATA-POLICY.md','docs/PRIVACY.md','docs/TERMS.md','docs/SUPPORT.md','assets/logo.png']) {
       await mkdir(dirname(join(source,name)),{recursive:true});
       await copyFile(join(root,name),join(source,name));
     }
@@ -29,7 +29,7 @@ test('Sites archive includes license notices and only the visitor bundle, with m
       }
     }
     await walk(extracted);
-    assert.deepEqual(files.sort(),['.codex-plugin/plugin.json','LICENSE','README.md','THIRD_PARTY_NOTICES.md','docs/DATA-POLICY.md','skills/hwpx-desktop/SKILL.md'].sort());
+    assert.deepEqual(files.sort(),['.codex-plugin/plugin.json','LICENSE','README.md','THIRD_PARTY_NOTICES.md','docs/DATA-POLICY.md','docs/PRIVACY.md','docs/TERMS.md','docs/SUPPORT.md','docs/SITES-QUICKSTART.md','assets/logo.png','skills/hwpx-desktop/SKILL.md'].sort());
     for(const name of files) assert.deepEqual(await readFile(join(extracted,name)),await readFile(join(destination,name)));
   } finally {
     assert.ok(resolve(temp).startsWith(resolve(tmpdir())+sep));

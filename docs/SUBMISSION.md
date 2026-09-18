@@ -1,4 +1,4 @@
-# 한글메이트 제출 자료 초안
+# 한글메이트 제출 입력 자료
 
 기준일: 2026-09-18. 개발자 인증과 제품 심사는 별도 단계다. 이 문서는 제출용 입력 초안이며 승인·출시 완료를 의미하지 않는다. [공식 제출 안내](https://developers.openai.com/plugins/deploy/submission)를 기준으로 최종 포털의 필수 항목을 다시 확인한다.
 
@@ -12,7 +12,14 @@
 - GitHub 계정: `ajh1004ajh00`. 저장소: https://github.com/ajh1004ajh00/hwpx-desktop-plugin
 - 지원 이메일: [ajhajh503@gmail.com](mailto:ajhajh503@gmail.com)
 - 문제 제보: https://github.com/ajh1004ajh00/hwpx-desktop-plugin/issues (공개 게시판이므로 개인 문서·신분증·토큰을 첨부하지 않는다.)
-- 개인정보 안내 초안: [데이터 처리 기준](DATA-POLICY.md). 공개 개인정보처리방침·이용약관 URL과 운영 주체·지원 범위는 최종 확정 전이다.
+- 개인정보처리방침: https://github.com/ajh1004ajh00/hwpx-desktop-plugin/blob/main/docs/PRIVACY.md
+- 이용약관: https://github.com/ajh1004ajh00/hwpx-desktop-plugin/blob/main/docs/TERMS.md
+- 지원 페이지: https://github.com/ajh1004ajh00/hwpx-desktop-plugin/blob/main/docs/SUPPORT.md
+- 언어/공개 국가 초안: 한국어 / 대한민국. 포털 제출 시 운영자가 확정한다.
+- 카테고리 초안: 생산성(포털에서 제공하는 가장 가까운 항목).
+- 로고: `assets/logo.png` (512 × 512).
+- 출시 노트: 최초 공개 후보. HWP/HWPX 본문·최상위 표 분석, 선택 텍스트 편집, 글자 서식 변경, 중복 요청과 오래된 선택 방지 기능을 제공합니다.
+- 위 main 정책 URL은 PR #36 병합 후 공개 응답을 확인해야 한다. 병합 전에는 PR의 파일을 검토한다.
 
 ## 시작 프롬프트
 
@@ -24,7 +31,7 @@
 
 ## 설치와 지원 범위
 
-제출 유형은 Skills only를 기준으로 준비한다. `package-sites-plugin.mjs`로 만든 방문자용 ZIP을 사용한다. ZIP은 manifest, Skill, README, LICENSE, THIRD_PARTY_NOTICES, 데이터 처리 기준의 6개 파일이며 편집기 자산은 Sites에서 내려받는다. 사용자가 로컬 개발용 Node.js/Git/npm 서버를 설치할 필요는 없다.
+제출 유형은 Skills only를 기준으로 준비한다. `package-sites-plugin.mjs`로 만든 방문자용 ZIP을 사용한다. ZIP은 manifest, Skill, README, LICENSE, THIRD_PARTY_NOTICES, 정책·지원·시작 안내 5개 문서, 로고의 11개 파일이며 편집기 자산은 Sites에서 내려받는다. 사용자가 로컬 개발용 Node.js/Git/npm 서버를 설치할 필요는 없다.
 
 2026-09-18 Windows의 이 작업을 실행하는 Desktop 내장 브라우저에서 공개 Sites의 WebMCP 8개 도구를 직접 확인했다. 특정 ChatGPT/Codex 제품·앱 버전·계정 전체에 대한 지원 보장은 아니다. 제품명/버전/계정 조건을 명시한 새 사용자 설치 시험과 심사자 환경에서의 재현은 아직 필요하다. 일반 Chrome에서는 직접 편집 가능·WebMCP 미지원 안내를 확인했다. macOS는 이번 시험에서 제외했다.
 
@@ -58,11 +65,15 @@
 
 - [ ] 동일 조직의 개발자 인증 완료 및 제출 권한 확인 (#1, #17)
 - [x] 공개 개발자명 AnJuHyun, 지원 이메일, GitHub 계정·저장소 확정 (#14)
-- [ ] 제출 포털의 검증된 신원과 표시명 대조, 정책·약관 URL, 지원 국가/환경 확정 (#14)
+- [x] 정책·약관·지원 문서와 512px 로고 작성 (#14)
+- [ ] PR 병합 후 공개 URL 확인, 제출 포털의 검증된 신원과 표시명 대조, 지원 국가/환경 확정 (#14)
 - [ ] 최종 ZIP 버전·해시 고정 후 새 사용자 설치와 업데이트 시험 (#12, #28)
 - [ ] HWP/HWPX 실제 파일 확보·독립 뷰어 재열기·PDF 출력 비교 (#3, #10, #27)
 - [ ] 실제 한글 IME, 열기/저장 취소, 복잡한 문서 호환성 시험 (#2, #7, #9, #10)
-- [ ] Sites 운영 한도와 트래픽 증거, upstream 빌드 의존성 경고 처리 (#21, #23)
+- [x] upstream 빌드 의존성 경고를 고정 lock 패치로 해소하고 전체 audit를 CI에 추가 (#13)
+- [ ] Sites 운영 한도와 트래픽 증거 확인 (#21, #23)
 - [ ] 심사 제출 → 보완 요청 대응 → 승인 후 게시 (#17, #18)
 
 macOS 이슈 #11은 이번 작업에서 제외하며 기존 요구사항을 삭제하거나 완료 처리하지 않는다. 세부 증거와 한계는 [검증 기록](RELEASE-READINESS-2026-09-18.md)을 따른다.
+
+최종 QA 수행 순서와 판정 기준: [제출 전 QA 인수인계](SUBMISSION-QA.md). 후보 버전은 `0.1.0+codex.20260918031814`이며 ZIP 해시는 생성된 `test-results/sites-plugin.json`을 사용한다.
