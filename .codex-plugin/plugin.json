@@ -21,7 +21,7 @@
   "interface": {
     "displayName": "한글메이트",
     "shortDescription": "GPT와 함께 쓰고 고치는 한글 문서",
-    "longDescription": "공개 Sites 편집기에서 HWP/HWPX 문서를 직접 편집하고 AI와 함께 검색·작성·분석합니다. 방문자 Node.js/Git/로컬 서버 설치가 필요 없습니다. AI 편집에는 WebMCP 지원 내장 브라우저가 필요합니다. 파일은 브라우저에서 처리하며 요청에 필요한 내용만 AI에 제공합니다. PDF·IME·macOS 최종 검증과 플러그인 심사는 진행 중입니다.",
+    "longDescription": "공개 Sites 편집기에서 HWP/HWPX 문서를 직접 편집하고 AI와 함께 검색·작성·분석합니다. 방문자 Node.js/Git/로컬 서버 설치가 필요 없습니다. AI 편집에는 WebMCP 지원 내장 브라우저가 필요합니다. 파일은 브라우저에서 처리하며 요청에 필요한 내용만 AI에 제공합니다. PDF·IME·macOS 최종 검증을 진행하며 플러그인 심사 제출을 준비하고 있습니다.",
     "developerName": "AnJuHyun",
     "category": "Productivity",
     "capabilities": [
