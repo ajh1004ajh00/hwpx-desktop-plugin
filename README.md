@@ -61,7 +61,7 @@ npm test
 npm run build
 ```
 
-[기여 규칙](CONTRIBUTING.md) · [배포·검증 기록](docs/SITES-POC.md) · [실사용 검증 안내](docs/REVIEW-HANDOFF.md) · [마일스톤](https://github.com/ajh1004ajh00/hwpx-desktop-plugin/milestones)
+[기여 규칙](CONTRIBUTING.md) · [배포·검증 기록](docs/SITES-POC.md) · [실사용 검증 안내](docs/REVIEW-HANDOFF.md) · [제출 자료 초안](docs/SUBMISSION.md) · [최신 Windows 검증](docs/RELEASE-READINESS-2026-09-18.md) · [마일스톤](https://github.com/ajh1004ajh00/hwpx-desktop-plugin/milestones)
 
 <details>
 <summary>구조도 편집용 SVG</summary>
