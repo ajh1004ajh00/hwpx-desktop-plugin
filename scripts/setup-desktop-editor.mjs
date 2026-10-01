@@ -36,6 +36,7 @@ for (const file of ['rhwp.js', 'rhwp_bg.wasm']) {
   await cp(resolve(core, file), resolve(source, 'pkg', file));
   await cp(resolve(core, file), resolve(source, 'rhwp-studio/public', file));
 }
+await cp(resolve(core, 'rhwp.d.ts'), resolve(source, 'pkg/rhwp.d.ts'));
 // Copy only runtime assets; upstream public/samples contains documents unrelated to this package.
 for (const name of ['icons','images','favicon.ico','print.html','theme-init.js','rhwp.js','rhwp_bg.wasm']) {
   await cp(resolve(source,'rhwp-studio/public',name),resolve(root,'desktop/.runtime/public',name),{recursive:true});
